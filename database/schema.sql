@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL NOT NULL,
+  first_name VARCHAR(150) NOT NULL,
+  last_name VARCHAR(150) NOT NULL,
+  username VARCHAR(150) NOT NULL,
+  password VARCHAR(256) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  picture VARCHAR(256) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP,
+  CONSTRAINT pk_users PRIMARY KEY(id)
+);
+
+CREATE TABLE IF NOT EXISTS posts (
+  id SERIAL NOT NULL,
+  user_id INT NOT NULL,
+  title VARCHAR(150) NOT NULL,
+  body TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP,
+  CONSTRAINT pk_posts PRIMARY KEY(id),
+  CONSTRAINT fk_posts_users FOREIGN KEY(user_id) REFERENCES users(id)
+);
