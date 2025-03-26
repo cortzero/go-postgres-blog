@@ -89,7 +89,7 @@ func (repository *UserRepositoy) Create(ctx context.Context, user *user.User) er
 	return nil
 }
 
-func (repository *UserRepositoy) Update(ctx context.Context, id int, user user.User) error {
+func (repository *UserRepositoy) Update(ctx context.Context, id uint, user user.User) error {
 	update := `
 	UPDATE users SET first_name=$1, last_name=$2, email=$3, picture=$4, updated_at=$5
 	WHERE id=$6;
@@ -108,7 +108,7 @@ func (repository *UserRepositoy) Update(ctx context.Context, id int, user user.U
 	return nil
 }
 
-func (repository *UserRepositoy) Delete(ctx context.Context, id int) error {
+func (repository *UserRepositoy) Delete(ctx context.Context, id uint) error {
 	delete := `
 	DELETE FROM users WHERE id=$1;
 	`
