@@ -1,11 +1,9 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 
-	"github.com/cortzero/go-postgres-blog/internal/data"
 	"github.com/cortzero/go-postgres-blog/internal/server"
 	"github.com/joho/godotenv"
 )
@@ -20,10 +18,10 @@ func main() {
 	serv := server.New(host, port)
 
 	// Instantiating a database connection
-	database := data.New()
-	if err := database.DB.Ping(); err != nil {
-		log.Fatal(err)
-	}
+	// database := data.New()
+	// if err := database.DB.Ping(); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// Starting the server
 	go serv.Start()
@@ -33,5 +31,5 @@ func main() {
 	<-c
 
 	serv.Close()
-	data.Close()
+	// data.Close()
 }

@@ -10,6 +10,12 @@ type UserRepositoy struct {
 	Data *Data
 }
 
+func NewUserRepository() *UserRepositoy {
+	return &UserRepositoy{
+		Data: New(),
+	}
+}
+
 func (repository *UserRepositoy) GetAll(ctx context.Context) ([]user.User, error) {
 	query := `
 	SELECT id, first_name, last_name, username, email, picture, created_at, updated_at
@@ -101,7 +107,7 @@ func (repository *UserRepositoy) Update(ctx context.Context, id uint, user user.
 
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, user.FirstName, user.LastName, user.Email, user.Picture, user.UpdatedAt)
+	_, err = stmt.ExecContext(ctx, user.FirstName, user.LastName, user.Email, user.Picture, user.UpdatedAt, id)
 	if err != nil {
 		return err
 	}
