@@ -48,7 +48,13 @@ func (handler *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		handler.DeleteHandler(w, r)
 		return
 	default:
-		fmt.Println("404 Not Found")
+		newError := errors.NewErrorObject(
+			"NOT_FOUND",
+			"Could not found the requested URL.",
+			fmt.Sprintf("The URL '%s' does not exist.", r.URL.Path),
+			time.Now(),
+			r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
 		return
 	}
 }
