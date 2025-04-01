@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/cortzero/go-postgres-blog/internal/model/user"
+	"github.com/cortzero/go-postgres-blog/internal/server/errors"
 	"github.com/cortzero/go-postgres-blog/internal/server/response"
 )
 
@@ -56,7 +57,13 @@ func (handler *UserHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 	var u user.User
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		newError := errors.NewErrorObject(
+			"BAD_REQUEST",
+			"The request is malformed.",
+			"The body of the request may have an incorrect format.",
+			time.Now(),
+			r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
 		return
 	}
 
@@ -66,13 +73,19 @@ func (handler *UserHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 	u.CreatedAt = time.Now()
 	err = handler.Repository.Create(ctx, &u)
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		newError := errors.NewErrorObject(
+			"ERROR_CREATING_USER",
+			err.Error(),
+			"",
+			time.Now(),
+			r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
 		return
 	}
 
 	u.Password = ""
 	w.Header().Add("Location", fmt.Sprintf("%s%d", r.URL.String(), u.ID))
-	response.EncodeDataToJSON(w, r, http.StatusCreated, response.Map{"user": u})
+	response.EncodeDataToJSON(w, r, http.StatusCreated, response.Map{"userCreated": u})
 }
 
 func (handler *UserHandler) GetAllHandler(w http.ResponseWriter, r *http.Request) {
@@ -80,11 +93,20 @@ func (handler *UserHandler) GetAllHandler(w http.ResponseWriter, r *http.Request
 
 	users, err := handler.Repository.GetAll(ctx)
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		newError := errors.NewErrorObject(
+			"ERROR",
+			err.Error(),
+			"",
+			time.Now(),
+			r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
 		return
 	}
-
-	response.EncodeDataToJSON(w, r, http.StatusOK, response.Map{"users": users})
+	if users != nil {
+		response.EncodeDataToJSON(w, r, http.StatusOK, response.Map{"users": users})
+	} else {
+		response.EncodeDataToJSON(w, r, http.StatusOK, response.Map{"users": []user.User{}})
+	}
 }
 
 func (handler *UserHandler) GetByIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -92,14 +114,20 @@ func (handler *UserHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	ctx := r.Context()
 	user, err := handler.Repository.GetById(ctx, uint(userId))
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusNotFound, err.Error())
+		newError := errors.NewErrorObject(
+			"RESOURCE_NOT_FOUND",
+			"The requested resource was not found.",
+			fmt.Sprintf("The user with ID '%d' does not exist.", userId),
+			time.Now(),
+			r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
 		return
 	}
 
@@ -111,14 +139,20 @@ func (handler *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request
 
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var u user.User
 	err = json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		newError := errors.NewErrorObject(
+			"BAD_REQUEST",
+			"The request is malformed.",
+			"The body of the request may have an incorrect format.",
+			time.Now(),
+			r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
 		return
 	}
 
@@ -128,7 +162,13 @@ func (handler *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request
 	u.UpdatedAt = time.Now()
 	err = handler.Repository.Update(ctx, uint(userId), u)
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		newError := errors.NewErrorObject(
+			"RESOURCE_NOT_FOUND",
+			"The requested resource was not found.",
+			err.Error(),
+			time.Now(),
+			r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
 		return
 	}
 
@@ -140,14 +180,20 @@ func (handler *UserHandler) DeleteHandler(w http.ResponseWriter, r *http.Request
 
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	ctx := r.Context()
 	err = handler.Repository.Delete(ctx, uint(userId))
 	if err != nil {
-		response.CreateHTTPErrorMessage(w, r, http.StatusBadRequest, err.Error())
+		newError := errors.NewErrorObject(
+			"RESOURCE_NOT_FOUND",
+			"The requested resource was not found.",
+			err.Error(),
+			time.Now(),
+			r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
 		return
 	}
 

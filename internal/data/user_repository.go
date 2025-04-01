@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cortzero/go-postgres-blog/internal/model/user"
 )
@@ -107,8 +108,12 @@ func (repository *UserRepositoy) Update(ctx context.Context, id uint, user user.
 
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, user.FirstName, user.LastName, user.Email, user.Picture, user.UpdatedAt, id)
+	result, err := stmt.ExecContext(ctx, user.FirstName, user.LastName, user.Email, user.Picture, user.UpdatedAt, id)
 	if err != nil {
+		return err
+	}
+	if rows, err := result.RowsAffected(); rows == 0 {
+		err = fmt.Errorf("The user with ID '%d' does not exist.", id)
 		return err
 	}
 	return nil
@@ -126,8 +131,12 @@ func (repository *UserRepositoy) Delete(ctx context.Context, id uint) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, id)
+	result, err := stmt.ExecContext(ctx, id)
 	if err != nil {
+		return err
+	}
+	if rows, err := result.RowsAffected(); rows == 0 {
+		err = fmt.Errorf("The user with ID '%d' does not exist.", id)
 		return err
 	}
 	return nil

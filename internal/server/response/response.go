@@ -3,10 +3,13 @@ package response
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
-type ErrorMessage struct {
-	Message string `json:"message"`
+type ErrorResponse struct {
+	Status     string `json:"status"`
+	StatusCode string `json:"status_code"`
+	Error      *any   `json:"error"`
 }
 
 type Map map[string]any
@@ -29,9 +32,11 @@ func EncodeDataToJSON(w http.ResponseWriter, r *http.Request, statuscode int, da
 	return nil
 }
 
-func CreateHTTPErrorMessage(w http.ResponseWriter, r *http.Request, statuscode int, message string) error {
-	msg := ErrorMessage{
-		Message: message,
+func CreateErrorResponse(w http.ResponseWriter, r *http.Request, statuscode int, errorObj any) error {
+	resp := ErrorResponse{
+		Status:     "Failed",
+		StatusCode: strconv.Itoa(statuscode),
+		Error:      &errorObj,
 	}
-	return EncodeDataToJSON(w, r, statuscode, msg)
+	return EncodeDataToJSON(w, r, statuscode, resp)
 }
