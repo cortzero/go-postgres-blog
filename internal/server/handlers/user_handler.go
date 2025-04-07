@@ -20,12 +20,12 @@ var (
 )
 
 type UserHandler struct {
-	Repository user.Repository
+	Service user.Service
 }
 
-func NewUserHandler(repository user.Repository) *UserHandler {
+func NewUserHandler(service user.Service) *UserHandler {
 	return &UserHandler{
-		Repository: repository,
+		Service: service,
 	}
 }
 
@@ -74,15 +74,9 @@ func (handler *UserHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 	defer r.Body.Close()
 
 	ctx := r.Context()
-	//u.CreatedAt = time.Now()
-	err = handler.Repository.Create(ctx, &u)
-	if err != nil {
-		newError := errors.NewCustomError(
-			"ERROR_CREATING_USER",
-			err.Error(),
-			"",
-			time.Now())
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
+	err_creation := handler.Service.CreateUser(ctx, &u)
+	if err_creation != nil {
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err_creation, r.URL.Path)
 		return
 	}
 
@@ -94,14 +88,9 @@ func (handler *UserHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 func (handler *UserHandler) GetAllHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	users, err := handler.Repository.GetAll(ctx)
+	users, err := handler.Service.GetAllUsers(ctx)
 	if err != nil {
-		newError := errors.NewCustomError(
-			"ERROR",
-			err.Error(),
-			"",
-			time.Now())
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err, r.URL.Path)
 		return
 	}
 	if users != nil {
@@ -121,14 +110,9 @@ func (handler *UserHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	ctx := r.Context()
-	user, err := handler.Repository.GetById(ctx, uint(userId))
-	if err != nil {
-		newError := errors.NewCustomError(
-			"RESOURCE_NOT_FOUND",
-			"The requested resource was not found.",
-			fmt.Sprintf("The user with ID '%d' does not exist.", userId),
-			time.Now())
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
+	user, error_get := handler.Service.GetUserById(ctx, uint(userId))
+	if error_get != nil {
+		response.CreateErrorResponse(w, r, http.StatusNotFound, error_get, r.URL.Path)
 		return
 	}
 
@@ -159,15 +143,9 @@ func (handler *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request
 	defer r.Body.Close()
 
 	ctx := r.Context()
-	u.UpdatedAt = time.Now()
-	err = handler.Repository.Update(ctx, uint(userId), u)
-	if err != nil {
-		newError := errors.NewCustomError(
-			"RESOURCE_NOT_FOUND",
-			"The requested resource was not found.",
-			err.Error(),
-			time.Now())
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
+	error_update := handler.Service.UpdateUser(ctx, uint(userId), &u)
+	if error_update != nil {
+		response.CreateErrorResponse(w, r, http.StatusNotFound, error_update, r.URL.Path)
 		return
 	}
 
@@ -184,14 +162,9 @@ func (handler *UserHandler) DeleteHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	ctx := r.Context()
-	err = handler.Repository.Delete(ctx, uint(userId))
-	if err != nil {
-		newError := errors.NewCustomError(
-			"RESOURCE_NOT_FOUND",
-			"The requested resource was not found.",
-			err.Error(),
-			time.Now())
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
+	error_deleting := handler.Service.DeleteUser(ctx, uint(userId))
+	if error_deleting != nil {
+		response.CreateErrorResponse(w, r, http.StatusNotFound, error_deleting, r.URL.Path)
 		return
 	}
 

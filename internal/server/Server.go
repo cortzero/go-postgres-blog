@@ -6,6 +6,7 @@ import (
 
 	"github.com/cortzero/go-postgres-blog/internal/data"
 	"github.com/cortzero/go-postgres-blog/internal/server/handlers"
+	"github.com/cortzero/go-postgres-blog/internal/service/services"
 )
 
 // Server contains a server configuration
@@ -17,8 +18,11 @@ func New(host string, port string) *Server {
 	// Database Connection
 	conn := data.New()
 
+	// User Service
+	userService := services.NewUserService(data.NewUserRepository(conn))
+
 	// User Handler
-	userHandler := handlers.NewUserHandler(data.NewUserRepository(conn))
+	userHandler := handlers.NewUserHandler(userService)
 
 	// Post Handler
 	postHandler := handlers.NewPostHandler(data.NewPostRepository(conn))

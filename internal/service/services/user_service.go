@@ -14,9 +14,9 @@ type UserService struct {
 	Repository user.Repository
 }
 
-func NewUserService(repository *user.Repository) *UserService {
+func NewUserService(repository user.Repository) *UserService {
 	return &UserService{
-		Repository: *repository,
+		Repository: repository,
 	}
 }
 
@@ -47,7 +47,7 @@ func (service *UserService) CreateUser(ctx context.Context, user *user.User) *er
 	return nil
 }
 
-func (service *UserService) UpdateUser(ctx context.Context, id uint, user user.User) *errors.CustomError {
+func (service *UserService) UpdateUser(ctx context.Context, id uint, user *user.User) *errors.CustomError {
 	// Check if user exists
 	existingUser, err := service.GetUserById(ctx, id)
 	if err != nil {
