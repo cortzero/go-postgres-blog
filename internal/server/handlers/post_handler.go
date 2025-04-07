@@ -62,9 +62,8 @@ func (handler *PostHandler) GetAllHandler(w http.ResponseWriter, r *http.Request
 			"ERROR",
 			err.Error(),
 			"",
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
 	}
 	if posts != nil {
@@ -83,9 +82,8 @@ func (handler *PostHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 			"ERROR",
 			err.Error(),
 			fmt.Sprintf("Error parsing the path variable '%s' on the URL", postIdStr),
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
 	}
 
@@ -96,9 +94,8 @@ func (handler *PostHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 			"RESOURCE_NOT_FOUND",
 			"The requested resource was not found.",
 			fmt.Sprintf("The post with ID '%d' does not exist.", postId),
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
 		return
 	}
 
@@ -113,9 +110,8 @@ func (handler *PostHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 			"BAD_REQUEST",
 			"The request is malformed.",
 			"The body of the request may have an incorrect format.",
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
 	}
 
@@ -129,9 +125,8 @@ func (handler *PostHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 			"ERROR_CREATING_POST",
 			"An error occurred while creating the post.",
 			err.Error(),
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
 	}
 

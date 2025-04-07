@@ -52,9 +52,8 @@ func (handler *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			"NOT_FOUND",
 			"Could not found the requested URL.",
 			fmt.Sprintf("The URL '%s' does not exist.", r.URL.Path),
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
 		return
 	}
 }
@@ -67,9 +66,8 @@ func (handler *UserHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 			"BAD_REQUEST",
 			"The request is malformed.",
 			"The body of the request may have an incorrect format.",
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
 	}
 
@@ -83,9 +81,8 @@ func (handler *UserHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 			"ERROR_CREATING_USER",
 			err.Error(),
 			"",
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
 	}
 
@@ -103,9 +100,8 @@ func (handler *UserHandler) GetAllHandler(w http.ResponseWriter, r *http.Request
 			"ERROR",
 			err.Error(),
 			"",
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
 	}
 	if users != nil {
@@ -120,7 +116,7 @@ func (handler *UserHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error(), r.URL.Path)
 		return
 	}
 
@@ -131,9 +127,8 @@ func (handler *UserHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 			"RESOURCE_NOT_FOUND",
 			"The requested resource was not found.",
 			fmt.Sprintf("The user with ID '%d' does not exist.", userId),
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
 		return
 	}
 
@@ -145,7 +140,7 @@ func (handler *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request
 
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error(), r.URL.Path)
 		return
 	}
 
@@ -156,9 +151,8 @@ func (handler *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request
 			"BAD_REQUEST",
 			"The request is malformed.",
 			"The body of the request may have an incorrect format.",
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
 	}
 
@@ -172,9 +166,8 @@ func (handler *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request
 			"RESOURCE_NOT_FOUND",
 			"The requested resource was not found.",
 			err.Error(),
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
 		return
 	}
 
@@ -186,7 +179,7 @@ func (handler *UserHandler) DeleteHandler(w http.ResponseWriter, r *http.Request
 
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err.Error(), r.URL.Path)
 		return
 	}
 
@@ -197,9 +190,8 @@ func (handler *UserHandler) DeleteHandler(w http.ResponseWriter, r *http.Request
 			"RESOURCE_NOT_FOUND",
 			"The requested resource was not found.",
 			err.Error(),
-			time.Now(),
-			r.URL.Path)
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError)
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
 		return
 	}
 

@@ -10,6 +10,7 @@ type ErrorResponse struct {
 	Status     string `json:"status"`
 	StatusCode string `json:"status_code"`
 	Error      *any   `json:"error"`
+	Path       string `json:"path"`
 }
 
 type Map map[string]any
@@ -32,11 +33,12 @@ func EncodeDataToJSON(w http.ResponseWriter, r *http.Request, statuscode int, da
 	return nil
 }
 
-func CreateErrorResponse(w http.ResponseWriter, r *http.Request, statuscode int, errorObj any) error {
+func CreateErrorResponse(w http.ResponseWriter, r *http.Request, statuscode int, errorObj any, path string) error {
 	resp := ErrorResponse{
 		Status:     "Failed",
 		StatusCode: strconv.Itoa(statuscode),
 		Error:      &errorObj,
+		Path:       path,
 	}
 	return EncodeDataToJSON(w, r, statuscode, resp)
 }

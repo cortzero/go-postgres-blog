@@ -112,8 +112,12 @@ func (repository *UserRepositoy) Update(ctx context.Context, id uint, user user.
 	if err != nil {
 		return err
 	}
-	if rows, err := result.RowsAffected(); rows == 0 {
-		err = fmt.Errorf("The user with ID '%d' does not exist.", id)
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		err = fmt.Errorf("the user with id '%d' does not exist", id)
 		return err
 	}
 	return nil
@@ -135,8 +139,12 @@ func (repository *UserRepositoy) Delete(ctx context.Context, id uint) error {
 	if err != nil {
 		return err
 	}
-	if rows, err := result.RowsAffected(); rows == 0 {
-		err = fmt.Errorf("The user with ID '%d' does not exist.", id)
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		err = fmt.Errorf("the user with id '%d' does not exist", id)
 		return err
 	}
 	return nil
