@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	urlReWithoutParams = regexp.MustCompile(`^/api/v1/users$`)
-	urlReWithParams    = regexp.MustCompile(`^/api/v1/users/(\d+)$`)
+	usersUrlRegExpNoVars = regexp.MustCompile(`^/api/v1/users$`)
+	usersUrlRegExpVars   = regexp.MustCompile(`^/api/v1/users/(\d+)$`)
 )
 
 type UserHandler struct {
@@ -32,19 +32,19 @@ func NewUserHandler(repository user.Repository) *UserHandler {
 func (handler *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reqURL := strings.TrimSuffix(r.URL.Path, "/")
 	switch {
-	case r.Method == http.MethodGet && urlReWithoutParams.Match([]byte(reqURL)):
+	case r.Method == http.MethodGet && usersUrlRegExpNoVars.Match([]byte(reqURL)):
 		handler.GetAllHandler(w, r)
 		return
-	case r.Method == http.MethodGet && urlReWithParams.Match([]byte(reqURL)):
+	case r.Method == http.MethodGet && usersUrlRegExpVars.Match([]byte(reqURL)):
 		handler.GetByIdHandler(w, r)
 		return
-	case r.Method == http.MethodPost && urlReWithoutParams.Match([]byte(reqURL)):
+	case r.Method == http.MethodPost && usersUrlRegExpNoVars.Match([]byte(reqURL)):
 		handler.CreateHandler(w, r)
 		return
-	case r.Method == http.MethodPut && urlReWithParams.Match([]byte(reqURL)):
+	case r.Method == http.MethodPut && usersUrlRegExpVars.Match([]byte(reqURL)):
 		handler.UpdateHandler(w, r)
 		return
-	case r.Method == http.MethodDelete && urlReWithParams.Match([]byte(reqURL)):
+	case r.Method == http.MethodDelete && usersUrlRegExpVars.Match([]byte(reqURL)):
 		handler.DeleteHandler(w, r)
 		return
 	default:

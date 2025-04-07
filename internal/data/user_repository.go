@@ -11,9 +11,9 @@ type UserRepositoy struct {
 	Data *Data
 }
 
-func NewUserRepository() *UserRepositoy {
+func NewUserRepository(connection *Data) *UserRepositoy {
 	return &UserRepositoy{
-		Data: New(),
+		Data: connection,
 	}
 }
 

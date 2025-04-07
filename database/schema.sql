@@ -19,5 +19,5 @@ CREATE TABLE IF NOT EXISTS posts (
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP,
   CONSTRAINT pk_posts PRIMARY KEY(id),
-  CONSTRAINT fk_posts_users FOREIGN KEY(user_id) REFERENCES users(id)
+  CONSTRAINT fk_posts_users FOREIGN KEY (user_id) REFERENCES users(id)
 );

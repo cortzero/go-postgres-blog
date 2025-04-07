@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/cortzero/go-postgres-blog/internal/model/post"
@@ -9,6 +10,12 @@ import (
 
 type PostRepository struct {
 	Data *Data
+}
+
+func NewPostRepository(connection *Data) *PostRepository {
+	return &PostRepository{
+		Data: connection,
+	}
 }
 
 func (repository *PostRepository) GetAll(ctx context.Context) ([]post.Post, error) {
@@ -34,14 +41,16 @@ func (repository *PostRepository) GetAll(ctx context.Context) ([]post.Post, erro
 
 func (repository *PostRepository) GetById(ctx context.Context, id uint) (post.Post, error) {
 	query := `
-	SELECT id, title, body, user_id, created_at, updated_at
+	SELECT id, user_id, title, body, created_at, updated_at
 	FROM posts
-	WHERE id=$1;
+	WHERE id = $1;
 	`
+	logger := log.Default()
 	row := repository.Data.DB.QueryRowContext(ctx, query, id)
 	var p post.Post
-	err := row.Scan(&p.ID, &p.Title, &p.Body, &p.UserID, &p.CreatedAt, &p.UpdatedAt)
+	err := row.Scan(&p.ID, &p.UserID, &p.Title, &p.Body, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
+		logger.Panicln(err.Error())
 		return post.Post{}, err
 	}
 	return p, nil
@@ -71,7 +80,7 @@ func (repository *PostRepository) GetByUser(ctx context.Context, userId uint) ([
 
 func (repository *PostRepository) Create(ctx context.Context, post *post.Post) error {
 	insert := `
-	INSERT INTO posts (title, body, user_id, created_at, updated_at)
+	INSERT INTO posts (user_id, title, body, created_at, updated_at)
 	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id;
 	`
@@ -82,7 +91,7 @@ func (repository *PostRepository) Create(ctx context.Context, post *post.Post) e
 
 	defer stmt.Close()
 
-	row := stmt.QueryRowContext(ctx, post.Title, post.Body, post.UserID, time.Now(), nil)
+	row := stmt.QueryRowContext(ctx, post.UserID, post.Title, post.Body, time.Now(), nil)
 	err = row.Scan(&post.ID)
 	if err != nil {
 		return err
