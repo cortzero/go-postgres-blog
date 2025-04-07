@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/cortzero/go-postgres-blog/internal/model/user"
-	"github.com/cortzero/go-postgres-blog/internal/server/errors"
 	"github.com/cortzero/go-postgres-blog/internal/server/response"
+	"github.com/cortzero/go-postgres-blog/internal/service/errors"
 )
 
 var (
@@ -48,7 +48,7 @@ func (handler *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		handler.DeleteHandler(w, r)
 		return
 	default:
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"NOT_FOUND",
 			"Could not found the requested URL.",
 			fmt.Sprintf("The URL '%s' does not exist.", r.URL.Path),
@@ -62,7 +62,7 @@ func (handler *UserHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 	var u user.User
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"BAD_REQUEST",
 			"The request is malformed.",
 			"The body of the request may have an incorrect format.",
@@ -74,10 +74,10 @@ func (handler *UserHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 	defer r.Body.Close()
 
 	ctx := r.Context()
-	u.CreatedAt = time.Now()
+	//u.CreatedAt = time.Now()
 	err = handler.Repository.Create(ctx, &u)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"ERROR_CREATING_USER",
 			err.Error(),
 			"",
@@ -96,7 +96,7 @@ func (handler *UserHandler) GetAllHandler(w http.ResponseWriter, r *http.Request
 
 	users, err := handler.Repository.GetAll(ctx)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"ERROR",
 			err.Error(),
 			"",
@@ -123,7 +123,7 @@ func (handler *UserHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 	ctx := r.Context()
 	user, err := handler.Repository.GetById(ctx, uint(userId))
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"RESOURCE_NOT_FOUND",
 			"The requested resource was not found.",
 			fmt.Sprintf("The user with ID '%d' does not exist.", userId),
@@ -147,7 +147,7 @@ func (handler *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request
 	var u user.User
 	err = json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"BAD_REQUEST",
 			"The request is malformed.",
 			"The body of the request may have an incorrect format.",
@@ -162,7 +162,7 @@ func (handler *UserHandler) UpdateHandler(w http.ResponseWriter, r *http.Request
 	u.UpdatedAt = time.Now()
 	err = handler.Repository.Update(ctx, uint(userId), u)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"RESOURCE_NOT_FOUND",
 			"The requested resource was not found.",
 			err.Error(),
@@ -186,7 +186,7 @@ func (handler *UserHandler) DeleteHandler(w http.ResponseWriter, r *http.Request
 	ctx := r.Context()
 	err = handler.Repository.Delete(ctx, uint(userId))
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"RESOURCE_NOT_FOUND",
 			"The requested resource was not found.",
 			err.Error(),

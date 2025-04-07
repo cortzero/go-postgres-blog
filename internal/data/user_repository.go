@@ -64,7 +64,23 @@ func (repository *UserRepositoy) GetByUsername(ctx context.Context, username str
 	err := row.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Username, &u.PasswordHash, &u.Email,
 		&u.Picture, &u.CreatedAt, &u.UpdatedAt)
 	if err != nil {
-		return user.User{}, nil
+		return user.User{}, err
+	}
+	return u, nil
+}
+
+func (repository *UserRepositoy) GetByEmail(ctx context.Context, email string) (user.User, error) {
+	query := `
+	SELECT id, first_name, last_name, username, password, email, picture, created_at, updated_at
+	FROM users
+	WHERE email = $1;
+	`
+	row := repository.Data.DB.QueryRowContext(ctx, query, email)
+	var u user.User
+	err := row.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Username, &u.PasswordHash, &u.Email,
+		&u.Picture, &u.CreatedAt, &u.UpdatedAt)
+	if err != nil {
+		return user.User{}, err
 	}
 	return u, nil
 }
@@ -81,9 +97,9 @@ func (repository *UserRepositoy) Create(ctx context.Context, user *user.User) er
 	// }
 
 	// Hashes the password
-	if err := user.HashPassword(); err != nil {
-		return err
-	}
+	// if err := user.HashPassword(); err != nil {
+	// 	return err
+	// }
 
 	row := repository.Data.DB.QueryRowContext(ctx, insert,
 		user.FirstName, user.LastName, user.Username, user.PasswordHash, user.Email, user.Picture, user.CreatedAt, user.UpdatedAt,

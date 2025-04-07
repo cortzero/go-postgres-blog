@@ -2,15 +2,15 @@ package errors
 
 import "time"
 
-type ErrorObject struct {
+type CustomError struct {
 	ErrorType string    `json:"type"`
 	Message   string    `json:"message"`
 	Details   string    `json:"details"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
-func NewErrorObject(errorType string, message string, details string, timestamp time.Time) *ErrorObject {
-	return &ErrorObject{
+func NewCustomError(errorType string, message string, details string, timestamp time.Time) *CustomError {
+	return &CustomError{
 		ErrorType: errorType,
 		Message:   message,
 		Details:   details,

@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/cortzero/go-postgres-blog/internal/model/post"
-	"github.com/cortzero/go-postgres-blog/internal/server/errors"
 	"github.com/cortzero/go-postgres-blog/internal/server/response"
+	"github.com/cortzero/go-postgres-blog/internal/service/errors"
 )
 
 var (
@@ -58,7 +58,7 @@ func (handler *PostHandler) GetAllHandler(w http.ResponseWriter, r *http.Request
 
 	posts, err := handler.Repository.GetAll(ctx)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"ERROR",
 			err.Error(),
 			"",
@@ -78,7 +78,7 @@ func (handler *PostHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 
 	postId, err := strconv.Atoi(postIdStr)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"ERROR",
 			err.Error(),
 			fmt.Sprintf("Error parsing the path variable '%s' on the URL", postIdStr),
@@ -90,7 +90,7 @@ func (handler *PostHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 	ctx := r.Context()
 	post, err := handler.Repository.GetById(ctx, uint(postId))
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"RESOURCE_NOT_FOUND",
 			"The requested resource was not found.",
 			fmt.Sprintf("The post with ID '%d' does not exist.", postId),
@@ -106,7 +106,7 @@ func (handler *PostHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 	var p post.Post
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"BAD_REQUEST",
 			"The request is malformed.",
 			"The body of the request may have an incorrect format.",
@@ -121,7 +121,7 @@ func (handler *PostHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 	p.CreatedAt = time.Now()
 	err = handler.Repository.Create(ctx, &p)
 	if err != nil {
-		newError := errors.NewErrorObject(
+		newError := errors.NewCustomError(
 			"ERROR_CREATING_POST",
 			"An error occurred while creating the post.",
 			err.Error(),
