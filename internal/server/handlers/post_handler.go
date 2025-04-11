@@ -20,12 +20,12 @@ var (
 )
 
 type PostHandler struct {
-	Repository post.Repository
+	Service post.Service
 }
 
-func NewPostHandler(repository post.Repository) *PostHandler {
+func NewPostHandler(service post.Service) *PostHandler {
 	return &PostHandler{
-		Repository: repository,
+		Service: service,
 	}
 }
 
@@ -56,14 +56,9 @@ func (handler *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (handler *PostHandler) GetAllHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	posts, err := handler.Repository.GetAll(ctx)
+	posts, err := handler.Service.GetAllPosts(ctx)
 	if err != nil {
-		newError := errors.NewCustomError(
-			"ERROR",
-			err.Error(),
-			"",
-			time.Now())
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, err, r.URL.Path)
 		return
 	}
 	if posts != nil {
@@ -88,14 +83,9 @@ func (handler *PostHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	ctx := r.Context()
-	post, err := handler.Repository.GetById(ctx, uint(postId))
-	if err != nil {
-		newError := errors.NewCustomError(
-			"RESOURCE_NOT_FOUND",
-			"The requested resource was not found.",
-			fmt.Sprintf("The post with ID '%d' does not exist.", postId),
-			time.Now())
-		response.CreateErrorResponse(w, r, http.StatusNotFound, newError, r.URL.Path)
+	post, error_get := handler.Service.GetPostById(ctx, uint(postId))
+	if error_get != nil {
+		response.CreateErrorResponse(w, r, http.StatusNotFound, error_get, r.URL.Path)
 		return
 	}
 
@@ -118,15 +108,9 @@ func (handler *PostHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 	defer r.Body.Close()
 
 	ctx := r.Context()
-	p.CreatedAt = time.Now()
-	err = handler.Repository.Create(ctx, &p)
-	if err != nil {
-		newError := errors.NewCustomError(
-			"ERROR_CREATING_POST",
-			"An error occurred while creating the post.",
-			err.Error(),
-			time.Now())
-		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
+	error_creating := handler.Service.CreatePost(ctx, &p)
+	if error_creating != nil {
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, error_creating, r.URL.Path)
 		return
 	}
 

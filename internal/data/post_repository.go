@@ -41,7 +41,7 @@ func (repository *PostRepository) GetAll(ctx context.Context) ([]post.Post, erro
 
 func (repository *PostRepository) GetById(ctx context.Context, id uint) (post.Post, error) {
 	query := `
-	SELECT id, user_id, title, body, created_at, updated_at
+	SELECT id, user_id, title, body, created_at, COALESCE(updated_at, '0001-01-01T00:00:00Z')
 	FROM posts
 	WHERE id = $1;
 	`
@@ -111,7 +111,7 @@ func (repository *PostRepository) Update(ctx context.Context, id uint, post post
 
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, post.Title, post.Body, time.Now(), id)
+	_, err = stmt.ExecContext(ctx, post.Title, post.Body, post.UpdatedAt, id)
 	if err != nil {
 		return err
 	}

@@ -24,8 +24,11 @@ func New(host string, port string) *Server {
 	// User Handler
 	userHandler := handlers.NewUserHandler(userService)
 
+	// Post Service
+	postService := services.NewPostService(data.NewPostRepository(conn))
+
 	// Post Handler
-	postHandler := handlers.NewPostHandler(data.NewPostRepository(conn))
+	postHandler := handlers.NewPostHandler(postService)
 
 	// Creating the Server Mux
 	mux := http.NewServeMux()
