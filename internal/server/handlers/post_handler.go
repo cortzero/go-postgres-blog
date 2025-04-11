@@ -74,9 +74,9 @@ func (handler *PostHandler) GetByIdHandler(w http.ResponseWriter, r *http.Reques
 	postId, err := strconv.Atoi(postIdStr)
 	if err != nil {
 		newError := errors.NewCustomError(
-			"ERROR",
-			err.Error(),
+			"BAD_REQUEST",
 			fmt.Sprintf("Error parsing the path variable '%s' on the URL", postIdStr),
+			err.Error(),
 			time.Now())
 		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
@@ -99,7 +99,7 @@ func (handler *PostHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 		newError := errors.NewCustomError(
 			"BAD_REQUEST",
 			"The request is malformed.",
-			"The body of the request may have an incorrect format.",
+			err.Error(),
 			time.Now())
 		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
 		return
@@ -119,9 +119,69 @@ func (handler *PostHandler) CreateHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (handler *PostHandler) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	// Getting the id from the request URL
+	var postIdStr = r.PathValue("id")
 
+	// Converting the id from string to int
+	var postId, err = strconv.Atoi(postIdStr)
+	if err != nil {
+		newError := errors.NewCustomError(
+			"BAD_REQUEST",
+			fmt.Sprintf("Error parsing the path variable '%s' on the URL", postIdStr),
+			err.Error(),
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
+		return
+	}
+
+	// Decoding the body of the request
+	var p post.Post
+	err = json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		newError := errors.NewCustomError(
+			"BAD_REQUEST",
+			"The request is malformed.",
+			err.Error(),
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
+		return
+	}
+
+	defer r.Body.Close()
+
+	ctx := r.Context()
+	error_updating := handler.Service.UpdatePost(ctx, uint(postId), &p)
+	if error_updating != nil {
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, error_updating, r.URL.Path)
+		return
+	}
+
+	response.EncodeDataToJSON(w, r, http.StatusOK, nil)
 }
 
 func (handler *PostHandler) DeleteHandler(w http.ResponseWriter, r *http.Request) {
+	// Getting the id from the request URL
+	var postIdStr = r.PathValue("id")
 
+	// Converting the id from string to int
+	var postId, err = strconv.Atoi(postIdStr)
+	if err != nil {
+		newError := errors.NewCustomError(
+			"BAD_REQUEST",
+			fmt.Sprintf("Error parsing the path variable '%s' on the URL", postIdStr),
+			err.Error(),
+			time.Now())
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, newError, r.URL.Path)
+		return
+	}
+
+	// Deleting the post
+	ctx := r.Context()
+	error_deleting := handler.Service.DeletePost(ctx, uint(postId))
+	if error_deleting != nil {
+		response.CreateErrorResponse(w, r, http.StatusBadRequest, error_deleting, r.URL.Path)
+		return
+	}
+
+	response.EncodeDataToJSON(w, r, http.StatusOK, nil)
 }

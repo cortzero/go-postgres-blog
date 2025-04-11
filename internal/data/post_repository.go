@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/cortzero/go-postgres-blog/internal/model/post"
@@ -45,12 +44,10 @@ func (repository *PostRepository) GetById(ctx context.Context, id uint) (post.Po
 	FROM posts
 	WHERE id = $1;
 	`
-	logger := log.Default()
 	row := repository.Data.DB.QueryRowContext(ctx, query, id)
 	var p post.Post
 	err := row.Scan(&p.ID, &p.UserID, &p.Title, &p.Body, &p.CreatedAt, &p.UpdatedAt)
 	if err != nil {
-		logger.Panicln(err.Error())
 		return post.Post{}, err
 	}
 	return p, nil
